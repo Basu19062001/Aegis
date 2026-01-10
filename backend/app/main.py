@@ -1,19 +1,19 @@
 import secrets
 from typing import Annotated
 
-from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from uvicorn import run
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
 from fastapi.openapi.docs import get_swagger_ui_html
-from uvicorn import run
 
-from app.middleware.log_middleware import log_request_middleware
-from app.core.config import settings
 from app.logger import logger
+from app.core.config import settings
+from app.middleware.log_middleware import log_request_middleware
 from app.common.exception_handler import (
     request_validation_exception_handler,
     http_exception_handler,
