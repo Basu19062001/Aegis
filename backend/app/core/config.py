@@ -98,3 +98,4 @@ class Settings(BaseSettings):
         values = info.data
         return f"{values['REDPANDA_HOST']}:{values['REDPANDA_PORT']}"
 
+settings = Settings()
