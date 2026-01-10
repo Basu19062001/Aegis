@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from pydantic_settings import BaseSettings
 from starlette.config import Config
@@ -12,7 +12,20 @@ class Settings(BaseSettings):
     
     VERSION: str = config("VERSION", default="1.0.0")
     ENV: str = config("ENV", default="development")
+
+    DOC_ROOT_USERNAME: str = config("DOC_ROOT_USERNAME", cast=str)
+    DOC_ROOT_PASSWORD: str = config("DOC_ROOT_PASSWORD", cast=str)
+
+    # Allowed origin
+    ALLOWED_ORIGINS: List[str] = [
+        "*",
+        "http://localhost",
+        "http://localhost:8000",
+    ]
     
+    # Secrets
+    JWT_SECRET_KEY: str = config("JWT_SECRET_KEY", cast=str, default="asdasdkjb324ksj234")
+
     # PostgreSQL
     POSTGRES_USER: str = config("POSTGRES_USER", cast=str, default="admin")
     POSTGRES_PASSWORD: str = config("POSTGRES_PASSWORD", cast=str, default="pass***123")
@@ -98,3 +111,4 @@ class Settings(BaseSettings):
         values = info.data
         return f"{values['REDPANDA_HOST']}:{values['REDPANDA_PORT']}"
 
+settings = Settings()
