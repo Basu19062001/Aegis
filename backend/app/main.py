@@ -1,5 +1,6 @@
 import secrets
 from typing import Annotated
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status, HTTPException, Depends
 from fastapi.responses import JSONResponse
@@ -19,6 +20,35 @@ from app.common.exception_handler import (
     http_exception_handler,
     unhandled_exception_handler,
 )
+from app.db.mongodb import get_client
+from app.db.redis import get_redis, close_redis
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Application startup")
+
+    # ---- MongoDB ----
+    mongo_client = get_client()
+    await mongo_client.admin.command("ping")
+    logger.info("MongoDB connected")
+
+    # ---- Redis ----
+    redis_client = get_redis()
+    await redis_client.ping()
+    logger.info("Redis connected")
+
+    yield  # App runs here
+
+    # ---- Shutdown ----
+    await close_redis()
+
+    if mongo_client:
+        mongo_client.close()
+        logger.info("MongoDB connection closed")
+
+    logger.info("Application shutdown complete")
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -27,6 +57,7 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
+    lifespan=lifespan,
 )
 
 security = HTTPBasic()
@@ -87,10 +118,23 @@ async def get_swagger_documentation(username: str = Depends(get_current_username
 
 @app.get("/api/health", summary="Health Check", tags=["System"])
 async def health_check():
-    logger.info("Health check endpoint called")
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"message": "Healthy", "status": True, "version": settings.VERSION}
-    )
+    mongo_client = get_client()
+    redis_client = get_redis()
+
+    mongo_status = await mongo_client.admin.command("ping")
+    redis_status = await redis_client.ping()
+
+    response= {
+        "status": "operational",
+        "services": {
+            "postgres": "ready (async pool)",
+            "mongodb": "online" if mongo_status else "offline",
+            "redis": "connected" if redis_status else "error",
+        },
+        "version": settings.VERSION,
+    }
+    return JSONResponse(status_code=status.HTTP_200_OK, content=response)
+
 
 
 if __name__ == "__main__":
