@@ -71,7 +71,7 @@ file_handler = TimedRotatingFileHandler(
     backupCount=30,
     encoding="utf-8",
 )
-file_handler.setLevel(logging.INFO)  # keep everything ≥ INFO
+file_handler.setLevel(logging.ERROR) # Keep Error
 file_handler.setFormatter(file_formatter)
 
 console_handler = logging.StreamHandler(sys.stdout)
