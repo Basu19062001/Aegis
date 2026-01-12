@@ -22,6 +22,9 @@ class Settings(BaseSettings):
         "http://localhost",
         "http://localhost:8000",
     ]
+
+    # API prefix
+    API_V1_STR: str = config("API_V1_STR", cast=str, default="/api/v1")
     
     # Secrets
     JWT_SECRET_KEY: str = config("JWT_SECRET_KEY", cast=str, default="asdasdkjb324ksj234")

@@ -22,6 +22,7 @@ from app.common.exception_handler import (
 )
 from app.db.mongodb import get_client
 from app.db.redis import get_redis, close_redis
+from app.api.router import api_router
 
 
 @asynccontextmanager
@@ -84,6 +85,8 @@ app.add_exception_handler(RequestValidationError, request_validation_exception_h
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
 
+# Includ all routers
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(security)]) -> str:
     correct_username = secrets.compare_digest(credentials.username.encode(), settings.DOC_ROOT_USERNAME.encode())
