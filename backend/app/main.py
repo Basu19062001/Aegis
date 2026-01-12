@@ -22,12 +22,17 @@ from app.common.exception_handler import (
 )
 from app.db.mongodb import get_client
 from app.db.redis import get_redis, close_redis
+from app.db.init_db import init_db
 from app.api.router import api_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup")
+
+    # ---- PostgreSQL ----
+    await init_db()
+    logger.info("PostgreSQL ready")
 
     # ---- MongoDB ----
     mongo_client = get_client()
